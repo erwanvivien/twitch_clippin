@@ -145,3 +145,28 @@ def get_live_streamer(game_ids: List[str] = None, first=20):
         return default_response
 
     return utils.format_response(response)
+
+
+def get_top_games(first=20):
+    # curl -X GET 'https://api.twitch.tv/helix/games/top' \
+    # -H 'Authorization: Bearer cfabdegwdoklmawdzdo98xt2fo512y' \
+    # -H 'Client-Id: uo6dggojyb8d6soh92zknwmi5ej1q2'
+
+    headers = {
+        'Authorization': f'Bearer {global_bearer_token["access_token"]}',
+        'Client-Id': twitch_client,
+    }
+
+    params = (
+        ("first", first),
+    )
+
+    response = None
+    try:
+        response = requests.get("https://api.twitch.tv/helix/games/top",
+                                headers=headers, params=params)
+    except Exception as e:
+        logging.error("[get_top_games]: Couldn't retrieve top games")
+        return default_response
+
+    return utils.format_response(response)
