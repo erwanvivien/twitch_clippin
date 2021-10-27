@@ -42,3 +42,31 @@ def get_bearer_token():
             global_bearer_token = json
 
     return res
+
+
+def get_clips(broadcaster_id: int, first: int = 20, started_at: str = None) -> utils.RESPONSE_TYPE:
+    if started_at is None:
+        started_at = (datetime.datetime.now(
+            datetime.timezone.utc) - datetime.timedelta(days=1)).astimezone().isoformat()
+
+    headers = {
+        'Authorization': f'Bearer {global_bearer_token["access_token"]}',
+        'Client-Id': twitch_client,
+    }
+
+    params = (
+        ('broadcaster_id', broadcaster_id),
+        ('first', first),
+        ("started_at", started_at)
+    )
+
+    response = None
+    try:
+        response = requests.get(
+            'https://api.twitch.tv/helix/clips', headers=headers, params=params)
+    except:
+        logging.error(
+            f"[get_clips]: Couldn't fetch clips for {broadcaster_id}")
+        return None
+
+    return utils.format_response(response)
