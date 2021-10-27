@@ -117,3 +117,31 @@ def get_users(logins: List[str] = None):
             continue
 
     return {"success": all_good, "status": 200 if all_good else -1, "json": None}
+
+
+def get_live_streamer(game_ids: List[str] = None, first=20):
+    # curl -X GET 'https://api.twitch.tv/helix/search/channels?query=a_seagull' \
+    # -H 'Authorization: Bearer 2gbdx6oar67tqtcmt49t3wpcgycthx' \
+    # -H 'Client-Id: wbmytr93xzw8zbg0p1izqyzzc5mbiz'
+
+    headers = {
+        'Authorization': f'Bearer {global_bearer_token["access_token"]}',
+        'Client-Id': twitch_client,
+    }
+
+    params = [
+        ("first", first),
+    ]
+
+    for gi in game_ids:
+        params.append(("game_id", gi))
+
+    response = None
+    try:
+        response = requests.get("https://api.twitch.tv/helix/streams",
+                                headers=headers, params=params)
+    except:
+        logging.error("[get_live_streamer]: Couldn't authenticate")
+        return default_response
+
+    return utils.format_response(response)
