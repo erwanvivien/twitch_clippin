@@ -70,3 +70,50 @@ def get_clips(broadcaster_id: int, first: int = 20, started_at: str = None) -> u
         return None
 
     return utils.format_response(response)
+
+
+def get_users(logins: List[str] = None):
+    if not logins:
+        return default_response.copy()
+
+    global global_logins
+
+    for l in enumerate(logins):
+        if l in global_logins:
+            global_logins.remove(l)
+
+    headers = {
+        'Authorization': f'Bearer {global_bearer_token["access_token"]}',
+        'Client-Id': twitch_client,
+    }
+
+    all_good = True
+
+    step = 100
+    for i in range(0, len(logins), step):
+        chunk = logins[i:i + step]
+
+        params = []
+        for c in chunk:
+            params.append(("login", c))
+
+        response = None
+        try:
+            response = requests.get(
+                "https://api.twitch.tv/helix/users", params=params, headers=headers)
+        except:
+            logging.error("[get_users]: Couldn't retrieve users")
+            all_good = False
+            continue
+
+        try:
+            data = response.json()["data"]
+            for i, user in enumerate(data):
+                user.pop('offline_image_url', None)
+                global_logins[chunk[i]] = user
+        except:
+            logging.error("[get_users]: Request bad formated")
+            all_good = False
+            continue
+
+    return {"success": all_good, "status": 200 if all_good else -1, "json": None}
