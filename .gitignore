@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 /twitch_*
+/clips/*
+token_youtube_v3.pickle
+client_secrets.json
