@@ -60,7 +60,7 @@ def _get_credentials(flow, storage, get_code_callback):
 
 
 def Create_Service(get_code_callback):
-    print(CLIENT_SECRETS_FILE, API_NAME, API_VERSION, SCOPES, sep='-')
+    # print(CLIENT_SECRETS_FILE, API_NAME, API_VERSION, SCOPES, sep='-')
 
     cred = None
 
@@ -111,33 +111,41 @@ def Create_Service(get_code_callback):
         return None
 
 
-def convert_to_RFC_datetime(year=1900, month=1, day=1, hour=0, minute=0):
-    dt = datetime.datetime(year, month, day, hour, minute, 0).isoformat() + 'Z'
-    return dt
-
-
-service = Create_Service(get_code)
-
-body = {  # https://developers.google.com/youtube/v3/docs/videos#resource
+body_default = {  # https://developers.google.com/youtube/v3/docs/videos#resource
     'snippet': {
-        'categoryI': 24,
+        'categoryId': 24,
         'title': 'Best twitch clip',
         'description': 'You can found more info on this channel ....',
         'tags': ['clip', 'twitch', 'lsf', 'livestreamfails', 'fails']
     },
     'status': {
-        'privacyStatus': 'private',
+        'privacyStatus': 'unlisted',  # public, unlisted or private
         'selfDeclaredMadeForKids': True
-    },
-    # 'recordingDetails': {
-    #     'recordingDate': datetime.datetime.now().isoformat() + "Z"
-    # }
+    }
 }
 
-media_file = MediaFileUpload(
-    "clips/EndearingKathishRaisinPRChase-qUwoNeVyK_snNrHU.mp4")
-response_upload = service.videos().insert(
-    part='snippet,status',
-    body=body,
-    media_body=media_file
-)
+service = Create_Service(get_code)
+
+
+def upload_yt(bc_video_id, bc_id, bc_title, bc_thumbnail_url, bc_broadcaster_name):
+
+    media_file = MediaFileUpload(
+        f"clips/{bc_id}.mp4")
+    body = body_default.copy()
+
+    body['snippet']['title'] = f'Twitch clips for {bc_broadcaster_name} | Clip {bc_title}'
+    body['snippet']['description'] = f"""
+Subscribe to streamer twitch channel here: https://twitch.tv/{bc_broadcaster_name}
+Find more clips here https://twitch.tv/{bc_broadcaster_name}/clips
+
+** Note **
+This is a youtube mirror to all best clips you have on twitch.tv
+"""
+    body['snippet']['thumbnails'] = {'thumb1': {'url': bc_thumbnail_url}}
+
+    response_upload = service.videos().insert(
+        part='snippet,status',
+        body=body,
+        media_body=media_file
+    ).execute()
+    return response_upload
