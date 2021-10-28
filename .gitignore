@@ -128,7 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-/twitch_*
+/twitch*
 /clips/*
 token_youtube_v3.pickle
 client_secrets.json

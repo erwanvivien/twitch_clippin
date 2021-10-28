@@ -3,11 +3,14 @@ from typing import List
 import utils
 import requests
 import datetime
+import json
 
 default_response = {"success": False, "status": -1, "json": None}
 
-twitch_client = utils.get_content("twitch_client")
-twitch_secret = utils.get_content("twitch_secret")
+twitch = json.loads(utils.get_content("twitch.json"))
+twitch_client = twitch["client_id"]
+twitch_secret = twitch["client_secret"]
+
 
 global_bearer_token = {
     "access_token": None,
